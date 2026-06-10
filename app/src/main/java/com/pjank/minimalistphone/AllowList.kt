@@ -29,5 +29,11 @@ object AllowList {
         "com.google.android.deskclock",        // Clock
         "com.google.android.calendar",         // Calendar
         "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
+
+        // Work apps — live in the managed Work profile (user 10). They only appear once
+        // installed there via Company Portal; until then they're silently skipped.
+        "com.microsoft.teams",                 // Microsoft Teams
+        "com.microsoft.office.outlook",        // Microsoft Outlook
+        "com.azure.authenticator",             // Microsoft Authenticator
     )
 }
