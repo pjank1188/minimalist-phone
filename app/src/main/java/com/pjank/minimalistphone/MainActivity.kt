@@ -67,7 +67,7 @@ fun HomeScreen() {
         }
     }
     val timeFmt = remember { DateTimeFormatter.ofPattern("HH:mm") }
-    val dateFmt = remember { DateTimeFormatter.ofPattern("EEEE, d MMMM") }
+    val dateFmt = remember { DateTimeFormatter.ofPattern("EEE, d MMMM") }
 
     Column(
         modifier = Modifier
@@ -80,22 +80,30 @@ fun HomeScreen() {
         Text(
             text = now.format(timeFmt),
             color = Color.White,
+            fontFamily = Inter,
             fontSize = 64.sp,
-            fontWeight = FontWeight.Light
+            fontWeight = FontWeight.ExtraLight,
+            letterSpacing = 1.sp,
         )
         Text(
-            text = now.format(dateFmt),
+            text = now.format(dateFmt).lowercase(),
             color = Color.Gray,
-            fontSize = 16.sp
+            fontFamily = Inter,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.ExtraLight,
+            letterSpacing = 2.sp,
         )
 
         Spacer(Modifier.height(48.dp))
 
         apps.forEach { app ->
             Text(
-                text = app.label,
+                text = app.label.lowercase(),
                 color = Color.White,
+                fontFamily = Inter,
                 fontSize = 24.sp,
+                fontWeight = FontWeight.Light,
+                letterSpacing = 1.5.sp,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { launchApp(context, app) }
