@@ -36,4 +36,12 @@ object AllowList {
         "com.microsoft.office.outlook",        // Microsoft Outlook
         "com.azure.authenticator",             // Microsoft Authenticator
     )
+
+    /**
+     * Apps that should show in COLOR. While one of these is in the foreground, the
+     * GrayscaleService turns off system grayscale; everywhere else stays grayscale.
+     */
+    val COLOR_APPS = setOf(
+        "com.android.camera",                  // Camera
+    )
 }

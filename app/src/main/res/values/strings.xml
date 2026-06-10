@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">minimalist-phone</string>
+    <string name="grayscale_service_desc">Turns off grayscale while the camera is open, and back on everywhere else.</string>
 </resources>
