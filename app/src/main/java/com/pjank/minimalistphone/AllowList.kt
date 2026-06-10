@@ -35,6 +35,10 @@ object AllowList {
         "com.microsoft.teams",                 // Microsoft Teams
         "com.microsoft.office.outlook",        // Microsoft Outlook
         "com.azure.authenticator",             // Microsoft Authenticator
+
+        // Shared with wife — iCloud calendar/reminders bridged via DAVx5 (CalDAV).
+        "org.tasks",                           // Tasks.org (shared Reminders)
+        "at.bitfire.davdroid",                 // DAVx5 (sync config)
     )
 
     /**
