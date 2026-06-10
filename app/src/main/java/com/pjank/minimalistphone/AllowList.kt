@@ -29,6 +29,8 @@ object AllowList {
         "com.google.android.deskclock",        // Clock
         "com.google.android.calendar",         // Calendar
         "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
+        "org.thoughtcrime.securesms",          // Signal
+        "com.groupme.android",                 // GroupMe
 
         // Work apps — live in the managed Work profile (user 10). They only appear once
         // installed there via Company Portal; until then they're silently skipped.
