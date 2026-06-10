@@ -3,6 +3,7 @@ package com.pjank.minimalistphone
 import android.accessibilityservice.AccessibilityService
 import android.provider.Settings
 import android.view.accessibility.AccessibilityEvent
+import android.widget.Toast
 
 /**
  * Watches which app is in the foreground and toggles system-wide grayscale: OFF (color)
@@ -28,6 +29,13 @@ class GrayscaleService : AccessibilityService() {
         if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
         val pkg = event.packageName?.toString() ?: return
         if (pkg in ignored) return
+
+        // Time-blocked work app reached outside hours: bounce straight back home.
+        if (Schedule.isRestrictedNow(pkg)) {
+            performGlobalAction(GLOBAL_ACTION_HOME)
+            Toast.makeText(this, "work apps are off right now", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         setGrayscale(enabled = pkg !in AllowList.COLOR_APPS)
     }

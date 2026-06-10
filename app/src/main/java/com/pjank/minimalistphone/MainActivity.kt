@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
-    val apps = remember { loadApps(context) }
+    val allApps = remember { loadApps(context) }
 
     // Ticking clock — re-reads the time once a second.
     var now by remember { mutableStateOf(LocalDateTime.now()) }
@@ -68,6 +68,10 @@ fun HomeScreen() {
     }
     val timeFmt = remember { DateTimeFormatter.ofPattern("HH:mm") }
     val dateFmt = remember { DateTimeFormatter.ofPattern("EEE, d MMMM") }
+
+    // Recomputed every tick — the clock's read of `now` drives recomposition, so this
+    // re-evaluates each second and drops work apps once we're outside work hours.
+    val visibleApps = allApps.filterNot { Schedule.isRestrictedNow(it.component.packageName) }
 
     Column(
         modifier = Modifier
@@ -96,7 +100,7 @@ fun HomeScreen() {
 
         Spacer(Modifier.height(48.dp))
 
-        apps.forEach { app ->
+        visibleApps.forEach { app ->
             Text(
                 text = app.label.lowercase(),
                 color = Color.White,
