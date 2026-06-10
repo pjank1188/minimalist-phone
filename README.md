@@ -14,8 +14,11 @@ impossible to reach. Friction is a feature, not a bug.
 - **No app drawer.** Apps not on the allow-list cannot be opened from the launcher at all.
 - **Allow-list is hard-coded in source.** Changing which apps appear requires editing the
   code and rebuilding — deliberate friction.
-- **Grayscale** is a system setting (Developer Options → Simulate color space → Monochromacy),
-  not handled by the launcher.
+- **Grayscale** is a system setting, not handled by the launcher. Enabled via adb
+  color-correction monochromacy:
+  `adb shell settings put secure accessibility_display_daltonizer_enabled 1`
+  `adb shell settings put secure accessibility_display_daltonizer 0`
+  Revert with `... accessibility_display_daltonizer_enabled 0`.
 
 ## Allow-list (v1)
 
