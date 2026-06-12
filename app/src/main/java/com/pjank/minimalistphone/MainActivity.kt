@@ -63,6 +63,12 @@ data class AppEntry(
     val user: UserHandle,
 )
 
+/** The resolved allow-list, split into the main list and the quieter utilities section. */
+data class LoadedApps(
+    val primary: List<AppEntry>,
+    val utilities: List<AppEntry>,
+)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,7 +106,8 @@ fun HomeScreen() {
 
     // Recomputed every tick — the clock's read of `now` drives recomposition, so this
     // re-evaluates each second and drops work apps once we're outside work hours.
-    val visibleApps = allApps.filterNot { Schedule.isRestrictedNow(it.component.packageName) }
+    val visibleApps = allApps.primary.filterNot { Schedule.isRestrictedNow(it.component.packageName) }
+    val visibleUtilities = allApps.utilities.filterNot { Schedule.isRestrictedNow(it.component.packageName) }
 
     Column(
         modifier = Modifier
@@ -172,6 +179,24 @@ fun HomeScreen() {
                     .clickable { launchApp(context, app) }
                     .padding(vertical = 14.dp)
             )
+        }
+
+        if (visibleUtilities.isNotEmpty()) {
+            Spacer(Modifier.height(40.dp))
+            visibleUtilities.forEach { app ->
+                Text(
+                    text = app.label.lowercase(),
+                    color = Color.Gray,
+                    fontFamily = Inter,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.ExtraLight,
+                    letterSpacing = 1.5.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { launchApp(context, app) }
+                        .padding(vertical = 10.dp)
+                )
+            }
         }
     }
 }
@@ -245,7 +270,7 @@ private suspend fun currentLocation(context: Context): Pair<Double, Double>? {
  * returns every launchable app annotated with its package name; otherwise just the
  * allow-listed ones, in the order they're declared.
  */
-private fun loadApps(context: Context): List<AppEntry> {
+private fun loadApps(context: Context): LoadedApps {
     val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
 
@@ -261,12 +286,16 @@ private fun loadApps(context: Context): List<AppEntry> {
     }
 
     if (AllowList.SHOW_ALL) {
-        return byPackage
+        val everything = byPackage
             .map { (pkg, entry) -> entry.copy(label = "${entry.label}  —  $pkg") }
             .sortedBy { it.label.lowercase() }
+        return LoadedApps(primary = everything, utilities = emptyList())
     }
 
-    return AllowList.PACKAGES.mapNotNull { pkg -> byPackage[pkg] }
+    return LoadedApps(
+        primary = AllowList.PACKAGES.mapNotNull { pkg -> byPackage[pkg] },
+        utilities = AllowList.UTILITIES.mapNotNull { pkg -> byPackage[pkg] },
+    )
 }
 
 private fun launchApp(context: Context, app: AppEntry) {
