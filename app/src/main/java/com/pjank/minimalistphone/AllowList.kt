@@ -26,9 +26,7 @@ object AllowList {
         "com.google.android.apps.messaging",   // Messages
         "com.google.android.apps.maps",        // Maps
         "com.android.camera",                  // Camera
-        "com.google.android.deskclock",        // Clock
         "com.google.android.calendar",         // Calendar
-        "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
         "org.thoughtcrime.securesms",          // Signal
         "com.groupme.android",                 // GroupMe
         "com.google.android.gm",               // Gmail
@@ -46,15 +44,16 @@ object AllowList {
     )
 
     /**
-     * Rarely-used utility apps (banking, travel). Shown below the main list in smaller,
-     * dimmer text — present when needed, visually out of the way the rest of the time.
-     * Package names are the standard Play Store ids; verify with [SHOW_ALL] after
-     * installing (uninstalled packages are silently skipped, same as [PACKAGES]).
+     * Rarely-used utility apps (banking, travel, tools). Shown below the main list in
+     * smaller, dimmer text — present when needed, visually out of the way the rest of
+     * the time. Uninstalled packages are silently skipped, same as [PACKAGES].
      */
     val UTILITIES = listOf(
         "com.chase.sig.android",               // Chase
         "com.konylabs.capitalone",             // Capital One
         "com.fidelity.android",                // Fidelity Investments
         "com.delta.mobile.android",            // Fly Delta
+        "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
+        "com.google.android.deskclock",        // Clock
     )
 }

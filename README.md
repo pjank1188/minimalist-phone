@@ -38,11 +38,11 @@ adb shell settings put secure accessibility_enabled 1
 
 ## Allow-list
 
-Phone · Messages · Maps · Camera · Clock · Calendar · Proton Pass · Signal ·
-GroupMe · Gmail · Apple Music · Teams · Outlook · Microsoft Authenticator
+Phone · Messages · Maps · Camera · Calendar · Signal · GroupMe · Gmail ·
+Apple Music · Teams · Outlook · Microsoft Authenticator
 
 Utilities (smaller, dimmer section at the bottom of the screen):
-Chase · Capital One · Fidelity · Delta
+Chase · Capital One · Fidelity · Delta · Proton Pass · Clock
 
 No browser. The list lives in `AllowList.kt` (work apps resolve from the managed
 Work profile; DAVx5 stays installed for iCloud calendar sync but is off the menu).
