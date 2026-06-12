@@ -31,6 +31,7 @@ object AllowList {
         "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
         "org.thoughtcrime.securesms",          // Signal
         "com.groupme.android",                 // GroupMe
+        "com.google.android.gm",               // Gmail
 
         // Work apps — live in the managed Work profile (user 10). They only appear once
         // installed there via Company Portal; until then they're silently skipped.
