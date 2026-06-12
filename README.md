@@ -14,28 +14,27 @@ impossible to reach. Friction is a feature, not a bug.
 - **No app drawer.** Apps not on the allow-list cannot be opened from the launcher at all.
 - **Allow-list is hard-coded in source.** Changing which apps appear requires editing the
   code and rebuilding — deliberate friction.
-- **Grayscale** is a system setting (adb color-correction monochromacy), with an
-  accessibility service that auto-disables it while the camera is open:
+- **Grayscale** was tried system-wide (adb color-correction monochromacy with an
+  accessibility service auto-disabling it for the camera) and retired 2026-06-12 —
+  eliminating the doomscroll apps did the heavy lifting, so the color penalty wasn't
+  pulling its weight. Re-enable manually anytime with:
   `adb shell settings put secure accessibility_display_daltonizer_enabled 1`
   `adb shell settings put secure accessibility_display_daltonizer 0`
-  Revert with `... accessibility_display_daltonizer_enabled 0`.
 
-### Auto color-on-camera
+### Work-hours enforcement
 
-`GrayscaleService` (an AccessibilityService) watches the foreground app and turns
-grayscale OFF while an `AllowList.COLOR_APPS` package (the camera) is showing, ON
-everywhere else. One-time setup over adb (sideload-friendly — bypasses the
-"restricted setting" UI block):
+`WorkHoursService` (an AccessibilityService) watches the foreground app and bounces
+time-blocked work apps (see `Schedule.kt`) back to the home screen outside work
+hours, covering paths the launcher can't filter (recents, notifications). One-time
+setup over adb (sideload-friendly — bypasses the "restricted setting" UI block):
 
 ```
-adb shell pm grant com.pjank.minimalistphone android.permission.WRITE_SECURE_SETTINGS
-adb shell settings put secure enabled_accessibility_services com.pjank.minimalistphone/com.pjank.minimalistphone.GrayscaleService
+adb shell settings put secure enabled_accessibility_services com.pjank.minimalistphone/com.pjank.minimalistphone.WorkHoursService
 adb shell settings put secure accessibility_enabled 1
 ```
 
 (If other accessibility services are already enabled, append rather than overwrite the
-`enabled_accessibility_services` value.) Add more color apps by extending `COLOR_APPS`
-in `AllowList.kt` and rebuilding.
+`enabled_accessibility_services` value.)
 
 ## Allow-list (v1)
 

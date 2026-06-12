@@ -43,12 +43,4 @@ object AllowList {
         // calendar into Google Calendar via CalDAV, but doesn't need a menu entry —
         // it syncs in the background.
     )
-
-    /**
-     * Apps that should show in COLOR. While one of these is in the foreground, the
-     * GrayscaleService turns off system grayscale; everywhere else stays grayscale.
-     */
-    val COLOR_APPS = setOf(
-        "com.android.camera",                  // Camera
-    )
 }
