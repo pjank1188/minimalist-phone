@@ -63,9 +63,10 @@ data class AppEntry(
     val user: UserHandle,
 )
 
-/** The resolved allow-list, split into the main list and the quieter utilities section. */
+/** The resolved allow-list, split into the home screen's three sections. */
 data class LoadedApps(
     val primary: List<AppEntry>,
+    val work: List<AppEntry>,
     val utilities: List<AppEntry>,
 )
 
@@ -107,6 +108,7 @@ fun HomeScreen() {
     // Recomputed every tick — the clock's read of `now` drives recomposition, so this
     // re-evaluates each second and drops work apps once we're outside work hours.
     val visibleApps = allApps.primary.filterNot { Schedule.isRestrictedNow(it.component.packageName) }
+    val visibleWork = allApps.work.filterNot { Schedule.isRestrictedNow(it.component.packageName) }
     val visibleUtilities = allApps.utilities.filterNot { Schedule.isRestrictedNow(it.component.packageName) }
 
     Column(
@@ -179,6 +181,24 @@ fun HomeScreen() {
                     .clickable { launchApp(context, app) }
                     .padding(vertical = 14.dp)
             )
+        }
+
+        if (visibleWork.isNotEmpty()) {
+            Spacer(Modifier.height(24.dp))
+            visibleWork.forEach { app ->
+                Text(
+                    text = app.label.lowercase(),
+                    color = Color.White,
+                    fontFamily = Inter,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Light,
+                    letterSpacing = 1.5.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { launchApp(context, app) }
+                        .padding(vertical = 14.dp)
+                )
+            }
         }
 
         if (visibleUtilities.isNotEmpty()) {
@@ -289,11 +309,12 @@ private fun loadApps(context: Context): LoadedApps {
         val everything = byPackage
             .map { (pkg, entry) -> entry.copy(label = "${entry.label}  —  $pkg") }
             .sortedBy { it.label.lowercase() }
-        return LoadedApps(primary = everything, utilities = emptyList())
+        return LoadedApps(primary = everything, work = emptyList(), utilities = emptyList())
     }
 
     return LoadedApps(
         primary = AllowList.PACKAGES.mapNotNull { pkg -> byPackage[pkg] },
+        work = AllowList.WORK.mapNotNull { pkg -> byPackage[pkg] },
         utilities = AllowList.UTILITIES.mapNotNull { pkg -> byPackage[pkg] },
     )
 }

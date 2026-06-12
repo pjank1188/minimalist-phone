@@ -32,15 +32,20 @@ object AllowList {
         "com.google.android.gm",               // Gmail
         "com.apple.android.music",             // Apple Music
 
-        // Work apps — live in the managed Work profile (user 10). They only appear once
-        // installed there via Company Portal; until then they're silently skipped.
-        "com.microsoft.teams",                 // Microsoft Teams
-        "com.microsoft.office.outlook",        // Microsoft Outlook
-        "com.azure.authenticator",             // Microsoft Authenticator
-
         // DAVx5 (at.bitfire.davdroid) stays installed to bridge the shared iCloud
         // calendar into Google Calendar via CalDAV, but doesn't need a menu entry —
         // it syncs in the background.
+    )
+
+    /**
+     * Work apps — live in the managed Work profile (user 10). They only appear once
+     * installed there via Company Portal; until then they're silently skipped. Rendered
+     * like [PACKAGES] but separated by a gap to set the work block apart.
+     */
+    val WORK = listOf(
+        "com.microsoft.teams",                 // Microsoft Teams
+        "com.microsoft.office.outlook",        // Microsoft Outlook
+        "com.azure.authenticator",             // Microsoft Authenticator
     )
 
     /**
