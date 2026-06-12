@@ -39,9 +39,9 @@ object AllowList {
         "com.microsoft.office.outlook",        // Microsoft Outlook
         "com.azure.authenticator",             // Microsoft Authenticator
 
-        // Shared iCloud calendar with wife, bridged via DAVx5 (CalDAV) into Google Calendar.
-        // (Apple Reminders use an upgraded, non-CalDAV format and can't be bridged.)
-        "at.bitfire.davdroid",                 // DAVx5 (sync config)
+        // DAVx5 (at.bitfire.davdroid) stays installed to bridge the shared iCloud
+        // calendar into Google Calendar via CalDAV, but doesn't need a menu entry —
+        // it syncs in the background.
     )
 
     /**
