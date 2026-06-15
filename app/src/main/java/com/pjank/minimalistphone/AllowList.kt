@@ -58,6 +58,7 @@ object AllowList {
         "com.konylabs.capitalone",             // Capital One
         "com.fidelity.android",                // Fidelity Investments
         "com.delta.mobile.android",            // Fly Delta
+        "com.mobiquityinc.awsevents",          // AWS Events (AWS Summit NYC)
         "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
         "com.google.android.deskclock",        // Clock
     )
