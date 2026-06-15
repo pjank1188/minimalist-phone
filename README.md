@@ -42,7 +42,7 @@ Phone · Messages · Maps · Camera · Calendar · Signal · GroupMe · Gmail ·
 Apple Music · Teams · Outlook · Microsoft Authenticator
 
 Utilities (smaller, dimmer section at the bottom of the screen):
-Chase · Capital One · Fidelity · Delta · AWS Events · Proton Pass · Clock
+Chase · Capital One · Fidelity · Delta · Uber · AWS Events · Proton Pass · Clock
 
 No browser. The list lives in `AllowList.kt` (work apps resolve from the managed
 Work profile; DAVx5 stays installed for iCloud calendar sync but is off the menu).
