@@ -60,6 +60,7 @@ object AllowList {
         "com.chase.sig.android",               // Chase
         "com.konylabs.capitalone",             // Capital One
         "com.fidelity.android",                // Fidelity Investments
+        "com.youneedabudget.evergreen.app",    // YNAB (You Need A Budget)
         "com.delta.mobile.android",            // Fly Delta
         "com.ubercab",                         // Uber (rides)
         "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
