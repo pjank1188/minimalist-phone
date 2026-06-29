@@ -30,6 +30,8 @@ object AllowList {
         "org.thoughtcrime.securesms",          // Signal
         "com.groupme.android",                 // GroupMe
         "com.google.android.gm",               // Gmail
+        "com.fastmail.app",                    // Fastmail (p@pjank.com — consolidation target)
+        "ch.protonmail.android",               // Proton Mail
         "com.apple.android.music",             // Apple Music
         "com.grint.thegrint.pro",              // The Grint (golf GPS / scorecard)
 
@@ -60,7 +62,6 @@ object AllowList {
         "com.fidelity.android",                // Fidelity Investments
         "com.delta.mobile.android",            // Fly Delta
         "com.ubercab",                         // Uber (rides)
-        "com.mobiquityinc.awsevents",          // AWS Events (AWS Summit NYC)
         "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
         "com.google.android.deskclock",        // Clock
         "com.android.chrome",                  // Chrome — sole browser; Reddit/social
