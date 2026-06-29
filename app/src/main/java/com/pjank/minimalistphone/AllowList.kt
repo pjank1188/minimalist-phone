@@ -63,5 +63,7 @@ object AllowList {
         "com.mobiquityinc.awsevents",          // AWS Events (AWS Summit NYC)
         "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
         "com.google.android.deskclock",        // Clock
+        "com.android.chrome",                  // Chrome — sole browser; Reddit/social
+                                               // blocked device-wide via Private DNS.
     )
 }
