@@ -31,6 +31,7 @@ object AllowList {
         "com.groupme.android",                 // GroupMe
         "com.google.android.gm",               // Gmail
         "com.apple.android.music",             // Apple Music
+        "com.grint.thegrint.pro",              // The Grint (golf GPS / scorecard)
 
         // DAVx5 (at.bitfire.davdroid) stays installed to bridge the shared iCloud
         // calendar into Google Calendar via CalDAV, but doesn't need a menu entry —
