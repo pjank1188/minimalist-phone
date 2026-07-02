@@ -34,6 +34,9 @@ object AllowList {
         "ch.protonmail.android",               // Proton Mail
         "com.apple.android.music",             // Apple Music
         "com.grint.thegrint.pro",              // The Grint (golf GPS / scorecard)
+        "com.instagram.android",               // Instagram — visible only 17:00–18:00
+                                               // Eastern (see Schedule.kt); hidden and
+                                               // bounced the rest of the day.
 
         // DAVx5 (at.bitfire.davdroid) stays installed to bridge the shared iCloud
         // calendar into Google Calendar via CalDAV, but doesn't need a menu entry —
@@ -64,6 +67,8 @@ object AllowList {
         "com.delta.mobile.android",            // Fly Delta
         "com.ubercab",                         // Uber (rides)
         "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
+        "com.okta.android.auth",               // Okta Verify (2FA) — reachable any hour
+        "com.anthropic.claude",                // Claude (AI assistant)
         "com.google.android.deskclock",        // Clock
         "com.android.chrome",                  // Chrome — sole browser; Reddit/social
                                                // blocked device-wide via Private DNS.
