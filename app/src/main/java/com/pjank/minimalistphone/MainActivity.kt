@@ -73,7 +73,28 @@ data class LoadedApps(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ensureBlackWallpaper(this)
         setContent { HomeScreen() }
+    }
+}
+
+/**
+ * One-shot: paints both the system and lock-screen wallpapers solid black, so the lock
+ * screen matches the launcher and Material You derives a neutral (not blue) palette for
+ * the lock clock. Guarded by a pref so we don't re-set it on every launch — clear the
+ * "black_wallpaper_set" pref (or app data) to re-apply after changing wallpaper manually.
+ */
+private fun ensureBlackWallpaper(context: Context) {
+    val prefs = context.getSharedPreferences("launcher", Context.MODE_PRIVATE)
+    if (prefs.getBoolean("black_wallpaper_set", false)) return
+    try {
+        val black = android.graphics.Bitmap.createBitmap(64, 64, android.graphics.Bitmap.Config.ARGB_8888)
+        black.eraseColor(android.graphics.Color.BLACK)
+        val wm = android.app.WallpaperManager.getInstance(context)
+        wm.setBitmap(black, null, true, android.app.WallpaperManager.FLAG_SYSTEM or android.app.WallpaperManager.FLAG_LOCK)
+        prefs.edit().putBoolean("black_wallpaper_set", true).apply()
+    } catch (e: Exception) {
+        // Wallpaper is cosmetic — never let it break the launcher.
     }
 }
 
