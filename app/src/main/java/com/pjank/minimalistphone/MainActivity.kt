@@ -18,7 +18,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,6 +41,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -119,51 +119,33 @@ fun HomeScreen() {
             .padding(horizontal = 28.dp, vertical = 64.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Row(
+        // Design B: clock, date, and weather share the same center axis as the app list.
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column {
-                Text(
-                    text = now.format(timeFmt),
-                    color = Color.White,
-                    fontFamily = Inter,
-                    fontSize = 64.sp,
-                    fontWeight = FontWeight.ExtraLight,
-                    letterSpacing = 1.sp,
-                )
-                Text(
-                    text = now.format(dateFmt).lowercase(),
-                    color = Color.Gray,
-                    fontFamily = Inter,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraLight,
-                    letterSpacing = 2.sp,
-                )
+            Text(
+                text = now.format(timeFmt),
+                color = Color.White,
+                fontFamily = Inter,
+                fontSize = 64.sp,
+                fontWeight = FontWeight.ExtraLight,
+                letterSpacing = 1.sp,
+            )
+            val dateLine = buildString {
+                append(now.format(dateFmt).lowercase())
+                weather?.let { w -> append("  ·  ${w.tempF}° ${w.condition.lowercase()}") }
             }
-
-            Spacer(Modifier.weight(1f))
-
-            weather?.let { w ->
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "${w.tempF}°",
-                        color = Color.White,
-                        fontFamily = Inter,
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Light,
-                    )
-                    Text(
-                        text = w.condition,
-                        color = Color.Gray,
-                        fontFamily = Inter,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.ExtraLight,
-                        letterSpacing = 1.sp,
-                        maxLines = 1,
-                    )
-                }
-            }
+            Text(
+                text = dateLine,
+                color = Color.Gray,
+                fontFamily = Inter,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.ExtraLight,
+                letterSpacing = 2.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+            )
         }
 
         Spacer(Modifier.height(48.dp))
@@ -176,6 +158,7 @@ fun HomeScreen() {
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Light,
                 letterSpacing = 1.5.sp,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { launchApp(context, app) }
@@ -193,6 +176,7 @@ fun HomeScreen() {
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Light,
                     letterSpacing = 1.5.sp,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { launchApp(context, app) }
@@ -211,6 +195,7 @@ fun HomeScreen() {
                     fontSize = 17.sp,
                     fontWeight = FontWeight.ExtraLight,
                     letterSpacing = 1.5.sp,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { launchApp(context, app) }
