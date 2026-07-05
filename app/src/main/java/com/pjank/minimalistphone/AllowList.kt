@@ -29,9 +29,10 @@ object AllowList {
         "com.google.android.calendar",         // Calendar
         "org.thoughtcrime.securesms",          // Signal
         "com.groupme.android",                 // GroupMe
-        "com.google.android.gm",               // Gmail
-        "com.fastmail.app",                    // Fastmail (p@pjank.com — consolidation target)
-        "ch.protonmail.android",               // Proton Mail
+        "com.fastmail.app",                    // Fastmail (p@pjank.com — sole mail app;
+                                               // Gmail/Proton stay installed but hidden
+                                               // while accounts migrate over)
+        "notion.id",                           // Notion (notes / tasks)
         "com.apple.android.music",             // Apple Music
         "com.grint.thegrint.pro",              // The Grint (golf GPS / scorecard)
         "com.instagram.android",               // Instagram — visible only 17:00–18:00
