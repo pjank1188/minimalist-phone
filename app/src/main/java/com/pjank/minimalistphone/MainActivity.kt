@@ -4,8 +4,11 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.UserHandle
@@ -106,13 +109,28 @@ fun HomeScreen() {
     // Reload the app list whenever we return to the home screen, so newly installed or
     // removed apps show up without restarting the launcher.
     var allApps by remember { mutableStateOf(loadApps(context)) }
+    var pickups by remember { mutableStateOf(Pickups.today(context)) }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) allApps = loadApps(context)
+            if (event == Lifecycle.Event.ON_RESUME) {
+                allApps = loadApps(context)
+                pickups = Pickups.today(context)
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // Live-update the pickup count when WorkHoursService records an unlock (same process,
+    // so a SharedPreferences listener is enough).
+    DisposableEffect(Unit) {
+        val prefs = Pickups.prefs(context)
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+            pickups = Pickups.today(context)
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
     }
 
     // Ticking clock — re-reads the time once a second.
@@ -167,6 +185,18 @@ fun HomeScreen() {
                 textAlign = TextAlign.Center,
                 maxLines = 1,
             )
+            if (pickups > 0) {
+                Text(
+                    text = if (pickups == 1) "1 pickup" else "$pickups pickups",
+                    color = Color.DarkGray,
+                    fontFamily = Inter,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.ExtraLight,
+                    letterSpacing = 2.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
         }
 
         Spacer(Modifier.height(48.dp))
@@ -224,7 +254,77 @@ fun HomeScreen() {
                 )
             }
         }
+
+        val torch = rememberTorch()
+        if (torch.available) {
+            Spacer(Modifier.height(24.dp))
+            Text(
+                text = if (torch.on) "torch · on" else "torch",
+                color = if (torch.on) Color.White else Color.DarkGray,
+                fontFamily = Inter,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.ExtraLight,
+                letterSpacing = 1.5.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { torch.toggle() }
+                    .padding(vertical = 10.dp)
+            )
+        }
     }
+}
+
+/** Torch state for the home-screen row: whether the device has one, whether it's lit. */
+data class TorchState(val available: Boolean, val on: Boolean, val toggle: () -> Unit)
+
+/**
+ * Tracks and toggles the camera flash as a flashlight via [CameraManager.setTorchMode] —
+ * no camera permission needed. State comes from a TorchCallback, so the row stays right
+ * even when the torch is switched from quick settings or turned off by the camera app.
+ */
+@Composable
+private fun rememberTorch(): TorchState {
+    val context = LocalContext.current
+    val cameraManager = remember {
+        context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    }
+    val torchId = remember {
+        try {
+            cameraManager.cameraIdList.firstOrNull { id ->
+                cameraManager.getCameraCharacteristics(id)
+                    .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+    var on by remember { mutableStateOf(false) }
+
+    DisposableEffect(torchId) {
+        val callback = torchId?.let {
+            object : CameraManager.TorchCallback() {
+                override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
+                    if (cameraId == torchId) on = enabled
+                }
+            }.also { cameraManager.registerTorchCallback(it, null) }
+        }
+        onDispose { callback?.let { cameraManager.unregisterTorchCallback(it) } }
+    }
+
+    return TorchState(
+        available = torchId != null,
+        on = on,
+        toggle = {
+            torchId?.let {
+                try {
+                    cameraManager.setTorchMode(it, !on)
+                } catch (e: Exception) {
+                    // Torch briefly unavailable (camera in use) — ignore.
+                }
+            }
+        },
+    )
 }
 
 /**
