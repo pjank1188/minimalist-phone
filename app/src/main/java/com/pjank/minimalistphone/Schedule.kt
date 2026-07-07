@@ -6,10 +6,19 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /**
- * Time-based access rules. Work apps are only usable during work hours; outside the
- * window they're hidden from the launcher and bounced back to home if reached another way.
+ * Time-based access rules. A restricted app is hidden from the launcher and bounced back
+ * to home if reached another way (recents, notifications, share sheets). Three rules:
+ * work apps only during work hours, Instagram only in its daily window, and bedtime,
+ * which hides everything but the essentials overnight.
  */
 object Schedule {
+
+    /** Why an app is blocked right now — also the toast shown when it's bounced. */
+    enum class Restriction(val message: String) {
+        WORK("work apps are off right now"),
+        INSTAGRAM("instagram is 5–6 pm only"),
+        BEDTIME("it's bedtime"),
+    }
 
     private val zone = ZoneId.of("America/New_York")
     private const val START_HOUR = 8   // inclusive (08:00)
@@ -52,10 +61,42 @@ object Schedule {
         return isWeekday && inHours
     }
 
-    /** True if [pkg] is time-restricted and we're currently outside its allowed window. */
-    fun isRestrictedNow(pkg: String): Boolean = when (pkg) {
-        INSTAGRAM -> !instagramAllowed()
-        in TIME_RESTRICTED -> !workAppsAllowed()
-        else -> false
+    // Bedtime: 22:00–06:00 every day. The whole allow-list is hidden (and bounced) except
+    // the essentials below.
+    private const val BEDTIME_START_HOUR = 22 // inclusive (22:00 / 10 PM)
+    private const val BEDTIME_END_HOUR = 6    // exclusive (06:00)
+
+    /**
+     * The only allow-listed apps that stay usable during bedtime: emergencies (phone,
+     * Signal), alarms (clock), and 2FA — codes must be reachable at any hour, same
+     * principle that keeps Microsoft Authenticator out of [TIME_RESTRICTED]. Apps outside
+     * the allow-list (Settings, incoming-call UI, permission dialogs) are never bounced.
+     */
+    val BEDTIME_ALLOWED = setOf(
+        "com.google.android.dialer",    // Phone
+        "org.thoughtcrime.securesms",   // Signal
+        "com.google.android.deskclock", // Clock (alarms)
+        "com.azure.authenticator",      // Microsoft Authenticator (2FA)
+        "proton.android.pass",          // Proton Pass (2FA)
+        "com.okta.android.auth",        // Okta Verify (2FA)
+    )
+
+    /** True during bedtime: 22:00–06:00. The window wraps midnight. */
+    fun isBedtime(now: ZonedDateTime = ZonedDateTime.now(zone)): Boolean =
+        now.hour >= BEDTIME_START_HOUR || now.hour < BEDTIME_END_HOUR
+
+    /** The rule blocking [pkg] right now, or null if it's currently allowed. */
+    fun restrictionFor(pkg: String, now: ZonedDateTime = ZonedDateTime.now(zone)): Restriction? {
+        when (pkg) {
+            INSTAGRAM -> if (!instagramAllowed(now)) return Restriction.INSTAGRAM
+            in TIME_RESTRICTED -> if (!workAppsAllowed(now)) return Restriction.WORK
+        }
+        val allowListed = pkg in AllowList.PACKAGES || pkg in AllowList.WORK ||
+            pkg in AllowList.UTILITIES
+        if (isBedtime(now) && allowListed && pkg !in BEDTIME_ALLOWED) return Restriction.BEDTIME
+        return null
     }
+
+    /** True if [pkg] is blocked by any time rule right now. */
+    fun isRestrictedNow(pkg: String): Boolean = restrictionFor(pkg) != null
 }
