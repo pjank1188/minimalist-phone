@@ -36,6 +36,23 @@
             </intent-filter>
         </activity>
 
+        <!-- Link interstitial: offered for every http/https link so a tap pauses at
+             copy / send to desktop / open in chrome instead of going straight to the
+             browser. Not the HOME activity, so it opens like a normal app screen. -->
+        <activity
+            android:name=".LinkActivity"
+            android:exported="true"
+            android:label="link"
+            android:theme="@style/Theme.Minimalistphone">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".WorkHoursService"
             android:exported="false"
