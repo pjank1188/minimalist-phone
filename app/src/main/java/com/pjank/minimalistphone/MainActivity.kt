@@ -19,7 +19,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -110,12 +112,32 @@ fun HomeScreen() {
     // removed apps show up without restarting the launcher.
     var allApps by remember { mutableStateOf(loadApps(context)) }
     var pickups by remember { mutableStateOf(Pickups.today(context)) }
+
+    // Escalating unlock friction (see Friction): past the free daily allowance, a fresh
+    // unlock holds the home screen behind a dead overlay. An unlock reaches us two ways —
+    // ON_RESUME (we come back from under the keyguard) and the pickup prefs write
+    // (WorkHoursService records the unlock) — and their order isn't guaranteed, so both
+    // call this; the started-recently guard makes the second call a no-op.
+    var frictionEndsAtMs by remember { mutableStateOf(0L) }
+    var frictionStartedAtMs by remember { mutableStateOf(0L) }
+    val startFrictionIfOwed = {
+        val nowMs = System.currentTimeMillis()
+        val freshUnlock = nowMs - Pickups.lastUnlockMs(context) < 3_000
+        val startedRecently = nowMs - frictionStartedAtMs < 5_000
+        val seconds = Friction.delaySeconds(Pickups.today(context))
+        if (freshUnlock && !startedRecently && seconds > 0) {
+            frictionStartedAtMs = nowMs
+            frictionEndsAtMs = nowMs + seconds * 1_000L
+        }
+    }
+
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 allApps = loadApps(context)
                 pickups = Pickups.today(context)
+                startFrictionIfOwed()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -123,14 +145,30 @@ fun HomeScreen() {
     }
 
     // Live-update the pickup count when WorkHoursService records an unlock (same process,
-    // so a SharedPreferences listener is enough).
+    // so a SharedPreferences listener is enough). Only fire friction if we're actually
+    // the visible screen — unlocking straight into another app shouldn't queue a toll
+    // for the next trip home.
     DisposableEffect(Unit) {
         val prefs = Pickups.prefs(context)
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
             pickups = Pickups.today(context)
+            if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                startFrictionIfOwed()
+            }
         }
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+
+    // Self-ticking countdown for the friction overlay; sits at 0 whenever no toll is due.
+    var frictionRemainingS by remember { mutableStateOf(0) }
+    LaunchedEffect(frictionEndsAtMs) {
+        while (true) {
+            val leftMs = frictionEndsAtMs - System.currentTimeMillis()
+            frictionRemainingS = ((leftMs + 999) / 1_000).toInt().coerceAtLeast(0)
+            if (leftMs <= 0) break
+            delay(200)
+        }
     }
 
     // Ticking clock — re-reads the time once a second.
@@ -150,76 +188,59 @@ fun HomeScreen() {
     val visibleWork = allApps.work.filterNot { Schedule.isRestrictedNow(it.component.packageName) }
     val visibleUtilities = allApps.utilities.filterNot { Schedule.isRestrictedNow(it.component.packageName) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 28.dp, vertical = 64.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Design B: clock, date, and weather share the same center axis as the app list.
+    Box(Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 28.dp, vertical = 64.dp),
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = now.format(timeFmt),
-                color = Color.White,
-                fontFamily = Inter,
-                fontSize = 64.sp,
-                fontWeight = FontWeight.ExtraLight,
-                letterSpacing = 1.sp,
-            )
-            val dateLine = buildString {
-                append(now.format(dateFmt).lowercase())
-                weather?.let { w -> append("  ·  ${w.tempF}° ${w.condition.lowercase()}") }
-            }
-            Text(
-                text = dateLine,
-                color = Color.Gray,
-                fontFamily = Inter,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.ExtraLight,
-                letterSpacing = 2.sp,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-            )
-            if (pickups > 0) {
+            // Design B: clock, date, and weather share the same center axis as the app list.
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 Text(
-                    text = if (pickups == 1) "1 pickup" else "$pickups pickups",
-                    color = Color.DarkGray,
+                    text = now.format(timeFmt),
+                    color = Color.White,
                     fontFamily = Inter,
-                    fontSize = 13.sp,
+                    fontSize = 64.sp,
+                    fontWeight = FontWeight.ExtraLight,
+                    letterSpacing = 1.sp,
+                )
+                val dateLine = buildString {
+                    append(now.format(dateFmt).lowercase())
+                    weather?.let { w -> append("  ·  ${w.tempF}° ${w.condition.lowercase()}") }
+                }
+                Text(
+                    text = dateLine,
+                    color = Color.Gray,
+                    fontFamily = Inter,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.ExtraLight,
                     letterSpacing = 2.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp),
+                    maxLines = 1,
                 )
+                if (pickups > 0) {
+                    Text(
+                        text = if (pickups == 1) "1 pickup" else "$pickups pickups",
+                        color = Color.DarkGray,
+                        fontFamily = Inter,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.ExtraLight,
+                        letterSpacing = 2.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
             }
-        }
 
-        Spacer(Modifier.height(48.dp))
+            Spacer(Modifier.height(48.dp))
 
-        visibleApps.forEach { app ->
-            Text(
-                text = app.label.lowercase(),
-                color = Color.White,
-                fontFamily = Inter,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Light,
-                letterSpacing = 1.5.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { launchApp(context, app) }
-                    .padding(vertical = 14.dp)
-            )
-        }
-
-        if (visibleWork.isNotEmpty()) {
-            Spacer(Modifier.height(24.dp))
-            visibleWork.forEach { app ->
+            visibleApps.forEach { app ->
                 Text(
                     text = app.label.lowercase(),
                     color = Color.White,
@@ -234,14 +255,51 @@ fun HomeScreen() {
                         .padding(vertical = 14.dp)
                 )
             }
-        }
 
-        if (visibleUtilities.isNotEmpty()) {
-            Spacer(Modifier.height(40.dp))
-            visibleUtilities.forEach { app ->
+            if (visibleWork.isNotEmpty()) {
+                Spacer(Modifier.height(24.dp))
+                visibleWork.forEach { app ->
+                    Text(
+                        text = app.label.lowercase(),
+                        color = Color.White,
+                        fontFamily = Inter,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Light,
+                        letterSpacing = 1.5.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { launchApp(context, app) }
+                            .padding(vertical = 14.dp)
+                    )
+                }
+            }
+
+            if (visibleUtilities.isNotEmpty()) {
+                Spacer(Modifier.height(40.dp))
+                visibleUtilities.forEach { app ->
+                    Text(
+                        text = app.label.lowercase(),
+                        color = Color.Gray,
+                        fontFamily = Inter,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.ExtraLight,
+                        letterSpacing = 1.5.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { launchApp(context, app) }
+                            .padding(vertical = 10.dp)
+                    )
+                }
+            }
+
+            val torch = rememberTorch()
+            if (torch.available) {
+                Spacer(Modifier.height(24.dp))
                 Text(
-                    text = app.label.lowercase(),
-                    color = Color.Gray,
+                    text = if (torch.on) "torch · on" else "torch",
+                    color = if (torch.on) Color.White else Color.DarkGray,
                     fontFamily = Inter,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.ExtraLight,
@@ -249,28 +307,46 @@ fun HomeScreen() {
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { launchApp(context, app) }
+                        .clickable { torch.toggle() }
                         .padding(vertical = 10.dp)
                 )
             }
         }
 
-        val torch = rememberTorch()
-        if (torch.available) {
-            Spacer(Modifier.height(24.dp))
-            Text(
-                text = if (torch.on) "torch · on" else "torch",
-                color = if (torch.on) Color.White else Color.DarkGray,
-                fontFamily = Inter,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.ExtraLight,
-                letterSpacing = 1.5.sp,
-                textAlign = TextAlign.Center,
+        // The friction overlay: a dead black screen with the pickup number and a
+        // countdown. Swallows taps (no ripple — nothing here should feel interactive);
+        // the launcher has no back action, so waiting is the only way through.
+        if (frictionRemainingS > 0) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { torch.toggle() }
-                    .padding(vertical = 10.dp)
-            )
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) {},
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "pickup $pickups",
+                        color = Color.Gray,
+                        fontFamily = Inter,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraLight,
+                        letterSpacing = 2.sp,
+                    )
+                    Text(
+                        text = "$frictionRemainingS",
+                        color = Color.DarkGray,
+                        fontFamily = Inter,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraLight,
+                        letterSpacing = 2.sp,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            }
         }
     }
 }
