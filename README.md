@@ -47,6 +47,20 @@ adb shell settings put secure accessibility_enabled 1
 (If other accessibility services are already enabled, append rather than overwrite the
 `enabled_accessibility_services` value.)
 
+### Web blocklist (`WebBlocklist.kt`)
+
+Chrome is the one door the launcher can't filter: the YouTube app is pm-disabled but
+youtube.com works fine, and Private DNS only covers the domains it was pointed at.
+`WorkHoursService` closes the gap by reading Chrome's omnibox (the same way a screen
+reader would) and bouncing blocklisted domains home with a toast, subdomains included.
+Like the allow-list, the blocklist is hard-coded in source.
+
+Caveats: the omnibox lookup keys off Chrome's `url_bar` view ID — if a Chrome update
+ever renames it the feature silently degrades to "no web blocking" (fails open, never
+breaks the phone). Chrome Custom Tabs use a different toolbar layout and aren't
+covered; the link interstitial below catches most of that traffic anyway. Incognito
+should be visible to accessibility services but hasn't been verified on-device.
+
 ### Link interstitial
 
 Tapping an http/https link anywhere offers the launcher's `LinkActivity` alongside
