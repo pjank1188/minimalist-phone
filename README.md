@@ -47,6 +47,32 @@ adb shell settings put secure accessibility_enabled 1
 (If other accessibility services are already enabled, append rather than overwrite the
 `enabled_accessibility_services` value.)
 
+### Escalating unlock friction (`Friction.kt`)
+
+The first 10 unlocks of the day cost nothing. Past that, each unlock onto the home
+screen holds it behind a dead black screen — just the pickup number and a countdown,
+taps swallowed — for 2 seconds per pickup over the allowance, capped at 20. First
+checks are free; compulsive re-checks pay a toll.
+
+Deliberately friction, not prison: tapping a notification or switching via recents
+still opens apps directly, unlocking into a foreground app (e.g. navigation) skips
+the toll, and the cap keeps the worst case irrelevant in an emergency. The knobs
+are hard-coded in `Friction.kt`.
+
+### Web blocklist (`WebBlocklist.kt`)
+
+Chrome is the one door the launcher can't filter: the YouTube app is pm-disabled but
+youtube.com works fine, and Private DNS only covers the domains it was pointed at.
+`WorkHoursService` closes the gap by reading Chrome's omnibox (the same way a screen
+reader would) and bouncing blocklisted domains home with a toast, subdomains included.
+Like the allow-list, the blocklist is hard-coded in source.
+
+Caveats: the omnibox lookup keys off Chrome's `url_bar` view ID — if a Chrome update
+ever renames it the feature silently degrades to "no web blocking" (fails open, never
+breaks the phone). Chrome Custom Tabs use a different toolbar layout and aren't
+covered; the link interstitial below catches most of that traffic anyway. Incognito
+should be visible to accessibility services but hasn't been verified on-device.
+
 ### Link interstitial
 
 Tapping an http/https link anywhere offers the launcher's `LinkActivity` alongside

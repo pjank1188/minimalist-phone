@@ -31,6 +31,17 @@ adb shell pm disable-user --user 0 com.android.vending
 
 Then add the package to AllowList.kt and `gradlew installDebug` so it shows up.
 
+## Accessibility service config changes
+
+Android re-reads an accessibility service's config (event types, capabilities) only
+when the service restarts. Installing an update usually does that, but if a config
+change doesn't seem to take (e.g. web blocking not firing), re-toggle the service:
+
+```
+adb shell settings put secure enabled_accessibility_services ""
+./setup.sh
+```
+
 ## Other device-side state
 
 - **Private DNS** blocks Reddit/social device-wide (Chrome is the sole browser).
