@@ -68,13 +68,15 @@ object Schedule {
 
     /**
      * The only allow-listed apps that stay usable during bedtime: emergencies (phone,
-     * Signal), alarms (clock), and 2FA — codes must be reachable at any hour, same
-     * principle that keeps Microsoft Authenticator out of [TIME_RESTRICTED]. Apps outside
-     * the allow-list (Settings, incoming-call UI, permission dialogs) are never bounced.
+     * Messages), alarms (clock), 2FA — codes must be reachable at any hour, same
+     * principle that keeps Microsoft Authenticator out of [TIME_RESTRICTED] — and
+     * Gemini. Apps outside the allow-list (Settings, incoming-call UI, permission
+     * dialogs) are never bounced.
      */
     val BEDTIME_ALLOWED = setOf(
-        "com.google.android.dialer",    // Phone
-        "org.thoughtcrime.securesms",   // Signal
+        "com.google.android.dialer",           // Phone
+        "com.google.android.apps.messaging",   // Messages (swapped in for Signal)
+        "com.google.android.apps.bard",        // Gemini — allowed at all hours
         "com.google.android.deskclock", // Clock (alarms)
         "com.azure.authenticator",      // Microsoft Authenticator (2FA)
         "proton.android.pass",          // Proton Pass (2FA)

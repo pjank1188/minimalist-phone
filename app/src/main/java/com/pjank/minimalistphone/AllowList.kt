@@ -70,6 +70,7 @@ object AllowList {
         "proton.android.pass",                 // Proton Pass (authenticator / 2FA)
         "com.okta.android.auth",               // Okta Verify (2FA) — reachable any hour
         "com.anthropic.claude",                // Claude (AI assistant)
+        "com.google.android.apps.bard",        // Gemini — reachable any hour, incl. bedtime
         "com.google.android.deskclock",        // Clock
         "com.android.chrome",                  // Chrome — sole browser; Reddit/social
                                                // blocked device-wide via Private DNS.
