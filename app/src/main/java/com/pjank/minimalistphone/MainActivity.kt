@@ -113,21 +113,25 @@ fun HomeScreen() {
     var allApps by remember { mutableStateOf(loadApps(context)) }
     var pickups by remember { mutableStateOf(Pickups.today(context)) }
 
-    // Escalating unlock friction (see Friction): past the free daily allowance, a fresh
-    // unlock holds the home screen behind a dead overlay. An unlock reaches us two ways —
+    // Burst-sensitive unlock friction (see Friction): once recent-pickup heat passes the
+    // free allowance, a fresh unlock holds the home screen behind a dead overlay. An
+    // unlock reaches us two ways —
     // ON_RESUME (we come back from under the keyguard) and the pickup prefs write
     // (WorkHoursService records the unlock) — and their order isn't guaranteed, so both
     // call this; the started-recently guard makes the second call a no-op.
     var frictionEndsAtMs by remember { mutableStateOf(0L) }
     var frictionStartedAtMs by remember { mutableStateOf(0L) }
+    var tollToday by remember { mutableStateOf(TollLog.today(context)) }
     val startFrictionIfOwed = {
         val nowMs = System.currentTimeMillis()
         val freshUnlock = nowMs - Pickups.lastUnlockMs(context) < 3_000
         val startedRecently = nowMs - frictionStartedAtMs < 5_000
-        val seconds = Friction.delaySeconds(Pickups.today(context))
+        val seconds = Friction.delaySeconds(Pickups.currentHeat(context))
         if (freshUnlock && !startedRecently && seconds > 0) {
             frictionStartedAtMs = nowMs
             frictionEndsAtMs = nowMs + seconds * 1_000L
+            TollLog.record(context, seconds)
+            tollToday = TollLog.today(context)
         }
     }
 
@@ -137,6 +141,7 @@ fun HomeScreen() {
             if (event == Lifecycle.Event.ON_RESUME) {
                 allApps = loadApps(context)
                 pickups = Pickups.today(context)
+                tollToday = TollLog.today(context)
                 startFrictionIfOwed()
             }
         }
@@ -225,8 +230,12 @@ fun HomeScreen() {
                     maxLines = 1,
                 )
                 if (pickups > 0) {
+                    val pickupLine = buildString {
+                        append(if (pickups == 1) "1 pickup" else "$pickups pickups")
+                        if (tollToday > 0) append("  ·  ${TollLog.format(tollToday)} toll")
+                    }
                     Text(
-                        text = if (pickups == 1) "1 pickup" else "$pickups pickups",
+                        text = pickupLine,
                         color = Color.DarkGray,
                         fontFamily = Inter,
                         fontSize = 13.sp,
