@@ -44,6 +44,11 @@ adb shell settings put secure enabled_accessibility_services ""
 
 ## Other device-side state
 
+- **Gemini** (`com.google.android.apps.bard`) requires the Google app
+  (`com.google.android.googlequicksearchbox`) to be enabled — both were disabled in
+  the original de-Google cleanup and had to be re-enabled
+  (`adb shell pm enable --user 0 <package>`). The Google app has no launcher entry,
+  so it stays invisible; don't re-disable it or Gemini breaks.
 - **Private DNS** blocks Reddit/social device-wide (Chrome is the sole browser).
 - **Work profile** (user 10) is managed by Company Portal; work apps install there,
   and adb shell cannot query it — scope package queries with `--user 0`.
