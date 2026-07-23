@@ -35,7 +35,12 @@ Then add the package to AllowList.kt and `gradlew installDebug` so it shows up.
 
 Android re-reads an accessibility service's config (event types, capabilities) only
 when the service restarts. Installing an update usually does that, but if a config
-change doesn't seem to take (e.g. web blocking not firing), re-toggle the service:
+change doesn't seem to take (e.g. web blocking not firing), re-toggle the service.
+
+Reinstalling can also DISABLE the service outright (`enabled_accessibility_services`
+goes null) — the tell is the pickup counter vanishing from the home screen, and it
+means no pickups/heat/toll AND no app bouncing or web blocking. After any
+`gradlew installDebug`, verify and re-enable if needed:
 
 ```
 adb shell settings put secure enabled_accessibility_services ""

@@ -44,8 +44,9 @@ DISABLE=(
     com.google.android.play.games          # Play Games
     com.google.android.videos              # Google TV / Videos
     com.android.vending                    # Play Store (see DEVICE-SETUP.md to install apps)
-    com.google.android.apps.bard           # Gemini
-    com.google.android.googlequicksearchbox # Google app / Discover (also kills Assistant)
+    # Gemini (com.google.android.apps.bard) and the Google app
+    # (com.google.android.googlequicksearchbox) are deliberately NOT here: Gemini is
+    # allow-listed at all hours and needs the Google app enabled (see DEVICE-SETUP.md).
     ag.jup.jupiter.android                 # Jupiter (crypto)
     com.solanamobile.wallet                # Solana Wallet (crypto)
     com.solanamobile.dappstore             # Solana dApp Store (crypto)
