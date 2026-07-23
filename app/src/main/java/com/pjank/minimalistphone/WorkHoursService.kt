@@ -30,7 +30,10 @@ class WorkHoursService : AccessibilityService() {
      */
     private val unlockReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == Intent.ACTION_USER_PRESENT) Pickups.record(context)
+            if (intent.action == Intent.ACTION_USER_PRESENT) {
+                Pickups.record(context)
+                Sunburn.sync(context)
+            }
         }
     }
 
@@ -57,6 +60,9 @@ class WorkHoursService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         when (event?.eventType) {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
+                // Cheap when nothing crosses a threshold; lets sunburn cool off (and
+                // color return) while the phone is in use, not just at the next unlock.
+                Sunburn.sync(this)
                 val pkg = event.packageName?.toString() ?: return
                 Schedule.restrictionFor(pkg)?.let { restriction ->
                     performGlobalAction(GLOBAL_ACTION_HOME)

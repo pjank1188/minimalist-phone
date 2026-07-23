@@ -42,6 +42,16 @@ adb shell settings put secure enabled_accessibility_services ""
 ./setup.sh
 ```
 
+## Sunburn grayscale permission
+
+Sunburn (Sunburn.kt) flips the display to grayscale during pickup doom-loops via the
+secure color-correction settings, which needs a one-time adb grant (survives app
+updates, lost on uninstall/factory reset — without it sunburn is a silent no-op):
+
+```
+adb shell pm grant com.pjank.minimalistphone android.permission.WRITE_SECURE_SETTINGS
+```
+
 ## Other device-side state
 
 - **Gemini** (`com.google.android.apps.bard`) requires the Google app
