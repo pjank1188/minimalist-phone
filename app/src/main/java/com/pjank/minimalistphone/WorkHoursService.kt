@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
@@ -44,11 +46,14 @@ class WorkHoursService : AccessibilityService() {
      */
     private var lastWebBounceMs = 0L
 
+    private val handler = Handler(Looper.getMainLooper())
+
     override fun onServiceConnected() {
         registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_PRESENT))
     }
 
     override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
         try {
             unregisterReceiver(unlockReceiver)
         } catch (e: IllegalArgumentException) {
@@ -82,7 +87,16 @@ class WorkHoursService : AccessibilityService() {
                 val host = WebBlocklist.hostOf(urlBar.text?.toString() ?: return) ?: return
                 WebBlocklist.restrictionFor(host)?.let { message ->
                     lastWebBounceMs = SystemClock.elapsedRealtime()
-                    performGlobalAction(GLOBAL_ACTION_HOME)
+                    // HOME alone would leave Chrome parked on the blocked tab, and
+                    // every later visit to Chrome would bounce again — the browser
+                    // becomes unusable until the tab dies. BACK first gets Chrome off
+                    // the page (a link-opened tab closes outright); HOME follows after
+                    // a beat so it can't race ahead of the back press.
+                    performGlobalAction(GLOBAL_ACTION_BACK)
+                    handler.postDelayed(
+                        { performGlobalAction(GLOBAL_ACTION_HOME) },
+                        WEB_BOUNCE_HOME_DELAY_MS,
+                    )
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                 }
             }
@@ -95,5 +109,6 @@ class WorkHoursService : AccessibilityService() {
         const val CHROME = "com.android.chrome"
         const val URL_BAR_ID = "com.android.chrome:id/url_bar"
         const val WEB_BOUNCE_COOLDOWN_MS = 2_000L
+        const val WEB_BOUNCE_HOME_DELAY_MS = 250L
     }
 }
