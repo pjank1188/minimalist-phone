@@ -76,5 +76,8 @@ object AllowList {
         "com.google.android.deskclock",        // Clock
         "com.android.chrome",                  // Chrome — sole browser; Reddit/social
                                                // blocked device-wide via Private DNS.
+        "com.android.vending",                 // Play Store — installs/updates; its
+                                               // listings can re-enable pm-disabled
+                                               // apps, so it sits last and dim.
     )
 }

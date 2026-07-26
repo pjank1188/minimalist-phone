@@ -91,7 +91,7 @@ Work (separated by a gap): Teams · Outlook · Microsoft Authenticator
 
 Utilities (smaller, dimmer section at the bottom of the screen):
 Chase · Capital One · Fidelity · YNAB · Delta · Uber · Proton Pass · Okta Verify ·
-Claude · Clock · Chrome
+Claude · Gemini · Clock · Chrome · Play Store
 
 Chrome is the sole browser — Reddit/social are blocked device-wide via Private DNS.
 The list lives in `AllowList.kt` (work apps resolve from the managed Work profile;
@@ -118,9 +118,9 @@ launcher) — see `DEVICE-SETUP.md` for the few steps that stay manual.
 
 Formerly on this list: **Gemini** and the **Google app** (re-enabled — Gemini is
 allow-listed at all hours and needs the Google app running), and the **Play Store**
-(re-enabled 2026-07-26 so app updates flow again; it has no launcher entry, so it
-stays out of sight — see `DEVICE-SETUP.md` for the install deep-link and the caveat
-this reopens).
+(re-enabled 2026-07-26 so app updates flow again, and now on the home screen's
+utilities section — its listings can re-enable the pm-disabled apps above, so the
+disable wall is one conscious tap tall; see `DEVICE-SETUP.md`).
 
 ### To re-enable something later
 

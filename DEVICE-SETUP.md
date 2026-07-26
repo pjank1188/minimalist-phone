@@ -19,19 +19,15 @@ launch (see `ensureBlackWallpaper` in MainActivity.kt).
 
 ## Play Store
 
-Enabled, but off the allow-list: apps auto-update in the background and the Store has
-no launcher entry, so there's no casual browsing. (It was fully pm-disabled until
-2026-07-26; that also froze updates, and a 41-app backlog settled the trade-off.)
-Installing a new app means deep-linking straight to its listing:
+Enabled and on the home screen's utilities section (as of 2026-07-26 — it was fully
+pm-disabled before, which also froze all app updates; a 41-app backlog settled the
+trade-off). Auto-updates run in the background. Installing a new app is just using
+the Store, then adding the package to AllowList.kt and `gradlew installDebug` so it
+appears on the home screen.
 
-```
-adb shell am start -a android.intent.action.VIEW -d "market://details?id=<package>"
-```
-
-Then add the package to AllowList.kt and `gradlew installDebug` so it shows up.
-
-Caveat: with the Store enabled, a pm-disabled app's listing shows an "Enable" button —
-the disable wall is now only as strong as the friction of reaching the Store UI.
+Caveat: a pm-disabled app's listing shows an "Enable" button, so the disable wall on
+YouTube etc. is now one conscious tap tall. If that proves too tempting, the fallback
+is bouncing the Store UI via WorkHoursService (background updates would keep working).
 
 ## Accessibility service config changes
 

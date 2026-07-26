@@ -44,7 +44,7 @@ DISABLE=(
     com.google.android.play.games          # Play Games
     com.google.android.videos              # Google TV / Videos
     # The Play Store (com.android.vending) is deliberately NOT here: it stays enabled
-    # so apps auto-update, but has no launcher entry (see DEVICE-SETUP.md to install).
+    # so apps auto-update, and it's on the home screen's utilities list.
     # Gemini (com.google.android.apps.bard) and the Google app
     # (com.google.android.googlequicksearchbox) are deliberately NOT here: Gemini is
     # allow-listed at all hours and needs the Google app enabled (see DEVICE-SETUP.md).
@@ -60,7 +60,7 @@ for pkg in "${DISABLE[@]}"; do
     fi
 done
 
-echo "== play store: enabled for auto-updates (no launcher entry)"
+echo "== play store: enabled (auto-updates; utilities list on the home screen)"
 "$ADB" shell pm enable --user 0 com.android.vending >/dev/null 2>&1 || true
 
 echo "== lock screen: hide sensitive notifications and the media player card"
