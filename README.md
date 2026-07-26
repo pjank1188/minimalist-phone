@@ -112,12 +112,15 @@ launcher) — see `DEVICE-SETUP.md` for the few steps that stay manual.
 | `com.google.android.apps.youtube.music` | YouTube Music |
 | `com.google.android.play.games` | Play Games |
 | `com.google.android.videos` | Google TV / Videos |
-| `com.android.vending` | Play Store (blocks reinstalls; also pauses auto-updates) |
-| `com.google.android.apps.bard` | Gemini |
-| `com.google.android.googlequicksearchbox` | Google app / Discover feed (also disables Assistant) |
 | `ag.jup.jupiter.android` | Jupiter (crypto) |
 | `com.solanamobile.wallet` | Solana Wallet (crypto) |
 | `com.solanamobile.dappstore` | Solana dApp Store (crypto) |
+
+Formerly on this list: **Gemini** and the **Google app** (re-enabled — Gemini is
+allow-listed at all hours and needs the Google app running), and the **Play Store**
+(re-enabled 2026-07-26 so app updates flow again; it has no launcher entry, so it
+stays out of sight — see `DEVICE-SETUP.md` for the install deep-link and the caveat
+this reopens).
 
 ### To re-enable something later
 

@@ -19,17 +19,19 @@ launch (see `ensureBlackWallpaper` in MainActivity.kt).
 
 ## Play Store
 
-Disabled in the personal profile so there's no app browsing. Installing a new app
-means temporarily enabling it, installing, and disabling again:
+Enabled, but off the allow-list: apps auto-update in the background and the Store has
+no launcher entry, so there's no casual browsing. (It was fully pm-disabled until
+2026-07-26; that also froze updates, and a 41-app backlog settled the trade-off.)
+Installing a new app means deep-linking straight to its listing:
 
 ```
-adb shell pm enable --user 0 com.android.vending
 adb shell am start -a android.intent.action.VIEW -d "market://details?id=<package>"
-# ...install from the phone...
-adb shell pm disable-user --user 0 com.android.vending
 ```
 
 Then add the package to AllowList.kt and `gradlew installDebug` so it shows up.
+
+Caveat: with the Store enabled, a pm-disabled app's listing shows an "Enable" button —
+the disable wall is now only as strong as the friction of reaching the Store UI.
 
 ## Accessibility service config changes
 
