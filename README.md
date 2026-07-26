@@ -16,10 +16,12 @@ impossible to reach. Friction is a feature, not a bug.
 - **No app drawer.** Apps not on the allow-list cannot be opened from the launcher at all.
 - **Allow-list is hard-coded in source.** Changing which apps appear requires editing the
   code and rebuilding — deliberate friction.
-- **Grayscale** was tried system-wide (adb color-correction monochromacy with an
-  accessibility service auto-disabling it for the camera) and retired 2026-06-12 —
-  eliminating the doomscroll apps did the heavy lifting, so the color penalty wasn't
-  pulling its weight. Re-enable manually anytime with:
+- **Grayscale** was tried twice and retired twice: system-wide (adb color-correction
+  monochromacy with an accessibility service auto-disabling it for the camera, retired
+  2026-06-12), then revived as "sunburn" — gray only during pickup doom-loops until the
+  heat decayed — and retired again 2026-07-26. Same verdict both times: eliminating the
+  doomscroll apps did the heavy lifting, so the color penalty wasn't pulling its
+  weight. Re-enable manually anytime with:
   `adb shell settings put secure accessibility_display_daltonizer_enabled 1`
   `adb shell settings put secure accessibility_display_daltonizer 0`
 
@@ -33,8 +35,8 @@ for the home screen's pickup counter. Three rules:
 - **Work apps** (Teams, Outlook): Mon–Fri 08:00–18:00 Eastern only.
 - **Instagram:** 17:00–18:00 Eastern daily only.
 - **Bedtime:** 22:00–06:00 every day, the whole allow-list is hidden and bounced
-  except phone, Signal, clock (alarms), and the 2FA apps — codes must be reachable
-  at any hour.
+  except phone, Messages, Gemini, Kindle, clock (alarms), and the 2FA apps — codes
+  must be reachable at any hour, and reading in bed is fine.
 
 One-time accessibility setup over adb (sideload-friendly — bypasses the "restricted
 setting" UI block) is handled by `./setup.sh`, or by hand:
@@ -83,7 +85,7 @@ Chrome: a black screen showing the bare URL with three ways out — `copy`,
 ## Allow-list
 
 Phone · Messages · Maps · Camera · Calendar · Signal · GroupMe · Fastmail · Notion ·
-Apple Music · The Grint · Instagram (5–6 PM only)
+Apple Music · Kindle · The Grint · Instagram (5–6 PM only)
 
 Work (separated by a gap): Teams · Outlook · Microsoft Authenticator
 

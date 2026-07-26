@@ -34,6 +34,8 @@ object AllowList {
                                                // while accounts migrate over)
         "notion.id",                           // Notion (notes / tasks)
         "com.apple.android.music",             // Apple Music
+        "com.amazon.kindle",                   // Kindle — reachable any hour, incl.
+                                               // bedtime (see Schedule.BEDTIME_ALLOWED)
         "com.grint.thegrint.pro",              // The Grint (golf GPS / scorecard)
         "com.instagram.android",               // Instagram — visible only 17:00–18:00
                                                // Eastern (see Schedule.kt); hidden and
