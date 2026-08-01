@@ -134,3 +134,10 @@ adb shell pm enable <package>
 
 `./gradlew installDebug` locally, or grab the `app-debug` artifact from the GitHub
 Actions `build` workflow (runs on every push) and `adb install -r app-debug.apk`.
+
+## Retiring the experiment
+
+`./teardown.sh` reverses `setup.sh`: re-enables everything it disabled, restores the
+lock-screen defaults, and uninstalls the launcher so stock Android takes over. Private
+DNS and developer options are switched off by hand in Settings (the script reminds
+you). Coming back later is `./gradlew installDebug` + `./setup.sh`.
