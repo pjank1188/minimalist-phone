@@ -54,11 +54,18 @@ echo "== color correction off (in case a grayscale experiment left it on)"
 "$ADB" shell settings put secure accessibility_display_daltonizer_enabled 0
 
 echo "== removing WorkHoursService from enabled accessibility services"
-# Append-aware, like setup.sh: strips only our entry, keeps any others.
+# Append-aware, like setup.sh: strips only our entry, keeps any others. The
+# `|| true` matters — when ours is the only service, grep matches nothing and
+# exits 1, which under `set -euo pipefail` would kill the script pre-uninstall.
 current="$("$ADB" shell settings get secure enabled_accessibility_services | tr -d '\r')"
 if [[ "$current" != "null" && -n "$current" ]]; then
-    cleaned="$(printf '%s' "$current" | tr ':' '\n' | grep -vFx "$SERVICE" | paste -sd: -)"
-    "$ADB" shell settings put secure enabled_accessibility_services "\"$cleaned\""
+    cleaned="$(printf '%s' "$current" | tr ':' '\n' | grep -vFx "$SERVICE" | paste -sd: - || true)"
+    if [[ -n "$cleaned" ]]; then
+        "$ADB" shell settings put secure enabled_accessibility_services "$cleaned"
+    else
+        "$ADB" shell settings delete secure enabled_accessibility_services
+        "$ADB" shell settings put secure accessibility_enabled 0
+    fi
 fi
 
 echo "== uninstalling the launcher (stock launcher takes over on the next Home press)"
